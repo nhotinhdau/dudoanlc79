@@ -9,15 +9,13 @@ let cachedConfidence = null;
 let cachedSession = null;
 
 // --- MẪU CẦU TT/XX ---
-const mau_cau_xau = [
-  "TXXTX","TXTXT","XXTXX","XTXTX","TTXTX",
+const mau_cau_xau = ["TXXTX","TXTXT","XXTXX","XTXTX","TTXTX",
   "XTTXT","TXXTT","TXTTX","XXTTX","XTXTT",
   "TXTXX","XXTXT","TTXXT","TXTTT","XTXTX",
   "XTXXT","XTTTX","TTXTT","XTXTT","TXXTX"
 ];
 
-const mau_cau_dep = [
-  "TTTTT","XXXXX","TTTXX","XXTTT","TXTXX",
+const mau_cau_dep = ["TTTTT","XXXXX","TTTXX","XXTTT","TXTXX",
   "TTTXT","XTTTX","TXXXT","XXTXX","TXTTT",
   "XTTTT","TTXTX","TXXTX","TXTXT","XTXTX",
   "TTTXT","XTTXT","TXTXT","XXTXX","TXXXX"
@@ -27,39 +25,35 @@ const mau_cau_dep = [
 function getRandomConfidence() {
   return (Math.random() * (90-40) + 40).toFixed(2) + "%";
 }
+function isCauXau(cauStr) { return mau_cau_xau.includes(cauStr); }
+function isCauDep(cauStr) { return mau_cau_dep.includes(cauStr); }
 
-function isCauXau(cauStr) {
-  return mau_cau_xau.includes(cauStr);
-}
-
-function isCauDep(cauStr) {
-  return mau_cau_dep.includes(cauStr);
-}
-
-// Dự đoán phiên tiếp theo dựa trên xí ngầu cuối + TT/XX
+// Dự đoán phiên tiếp theo
 function predictNext(history, cau) {
   if (!history || history.length === 0) return "Đợi thêm dữ liệu";
-  
+
   const lastDice = [history[0].Xuc_xac_1, history[0].Xuc_xac_2, history[0].Xuc_xac_3];
-  const total = lastDice[0]+lastDice[1]+lastDice[2];
+  const total = lastDice.reduce((a,b)=>a+b,0);
 
   let resultList = [];
   const weights = [0.5,0.3,0.2];
   for (let i=0;i<3;i++){
-    let tmp = lastDice[i]+total;
-    if(tmp===4 || tmp===5) tmp-=4;
-    else if(tmp>=6) tmp-=6;
-    let val = tmp%2===0 ? "Tài":"Xỉu";
+    let tmp = lastDice[i] + total;
+    if(tmp===4 || tmp===5) tmp -= 4;
+    else if(tmp>=6) tmp -= 6;
+    let val = tmp%2===0 ? "Tài" : "Xỉu";
     for(let j=0;j<weights[i]*10;j++) resultList.push(val);
   }
-  let pred = resultList.sort((a,b)=>
-    resultList.filter(v=>v===a).length - resultList.filter(v=>v===b).length
-  ).pop();
+
+  // Đếm tần suất
+  let counts = { "Tài": 0, "Xỉu": 0 };
+  resultList.forEach(v => counts[v]++);
+  let pred = counts["Tài"] >= counts["Xỉu"] ? "Tài" : "Xỉu";
 
   // Xử lý cầu TT/XX
   const cau5 = cau.slice(-5).join('');
-  if(isCauXau(cau5)){
-    pred = pred==="Tài"?"Xỉu":"Tài";
+  if (isCauXau(cau5)) {
+    pred = pred === "Tài" ? "Xỉu" : "Tài";
   }
 
   return pred;
@@ -67,20 +61,22 @@ function predictNext(history, cau) {
 
 // --- ENDPOINT DỰ ĐOÁN ---
 app.get('/api/taixiu/du_doan_68gb', async (req,res)=>{
-  try{
+  try {
     const response = await axios.get(HISTORY_API_URL);
-    const data = Array.isArray(response.data)?response.data:[response.data];
-    if(!data || data.length===0) throw new Error("Không có dữ liệu");
+    if(!response.data || (Array.isArray(response.data) && response.data.length === 0)){
+      throw new Error("Không có dữ liệu");
+    }
 
+    const data = Array.isArray(response.data) ? response.data : [response.data];
     const currentData = data[0];
-    const nextSession = currentData.Phien+1;
+    const nextSession = currentData.Phien + 1;
 
     if(cachedSession !== currentData.Phien){
       cachedSession = currentData.Phien;
       cachedConfidence = getRandomConfidence();
     }
 
-    // Lấy 5 cầu gần nhất từ lịch sử kết quả
+    // 5 cầu gần nhất
     let cau = data.slice(0,5).map(d=>d.Ket_qua==="Tài"?"T":"X");
 
     const du_doan = predictNext(data, cau);
@@ -97,7 +93,7 @@ app.get('/api/taixiu/du_doan_68gb', async (req,res)=>{
       giai_thich: "trần bình an đẹp trai"
     });
 
-  }catch(err){
+  } catch(err){
     console.error(err.message);
     res.status(500).json({
       id: "@cskhtoollxk",
@@ -113,5 +109,4 @@ app.get('/',(req,res)=>{
   res.send("Chào mừng đến API dự đoán Tài Xỉu! Truy cập /api/taixiu/du_doan_68gb để xem dự đoán.");
 });
 
-app.listen(PORT,()=>console.log(`Server đang chạy trên cổng ${PORT}`));
-
+app.listen(PORT,()=>console.log(`🚀 Server đang chạy trên cổng ${PORT}`));
