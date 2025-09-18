@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- CẤU HÌNH ---
-const HISTORY_API_URL = 'https://loq.onrender.com/api/lxk';
+const HISTORY_API_URL = 'https://kjjbv.onrender.com/api/lxk';
 let cachedConfidence = null;
 let cachedSession = null;
 
@@ -122,5 +122,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`🚀 Server đang chạy trên cổng ${PORT}`));
+
 
 
