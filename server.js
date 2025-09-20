@@ -1,7 +1,11 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors'); // Thêm dòng này
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Sử dụng cors middleware
+app.use(cors()); // Thêm dòng này để cho phép mọi tên miền truy cập
 
 // --- CẤU HÌNH ---
 const HISTORY_API_URL = 'https://kjjbv.onrender.com/api/lxk';
@@ -167,4 +171,4 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`🚀 Server đang chạy trên cổng ${PORT}`));
-  
+    
