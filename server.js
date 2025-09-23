@@ -1,12 +1,17 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const PORT = process.env.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 // --- CẤU HÌNH ---
 const HISTORY_API_URL = 'https://kaba-9mc9.onrender.com/api/lxk';
 
 // --- THUẬT TOÁN DỰ ĐOÁN THEO YÊU CẦU ---
+/**
+ * Thuật toán dự đoán dựa trên cầu mẫu và chu kỳ toán học.
+ * @param {number} index - Chỉ số phiên hiện tại.
+ * @returns {string} - Kết quả dự đoán ("Tài" hoặc "Xỉu").
+ */
 function vipPredictTX(index) {
   const patterns = [
     ["Tài", "Tài", "Xỉu", "Xỉu"],
@@ -26,6 +31,10 @@ function vipPredictTX(index) {
 }
 
 // --- HÀM TẠO ĐỘ TIN CẬY NGẪU NHIÊN ---
+/**
+ * Tạo một giá trị độ tin cậy ngẫu nhiên từ 65.0% đến 95.0%.
+ * @returns {string} - Giá trị độ tin cậy dưới dạng chuỗi có ký hiệu %.
+ */
 function getRandomConfidence() {
   const min = 65.0;
   const max = 95.0;
@@ -58,7 +67,7 @@ app.get('/api/2k15', async (req, res) => {
       phien_sau: nextSession, // nextSession giờ là kiểu số
       du_doan: prediction,
       do_tin_cay: confidence,
-      giai_thich: "lon mẹ mày"
+      giai_thich: "dmmmm"
     });
 
   } catch (err) {
@@ -78,4 +87,4 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Server đang chạy trên cổng ${PORT}`));
-        
+    
