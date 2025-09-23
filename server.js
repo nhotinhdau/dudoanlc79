@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 // --- CẤU HÌNH ---
 const HISTORY_API_URL = 'https://kaba-9mc9.onrender.com/api/lxk';
 
-// --- THUẬT TOÁN DỰ ĐOÁN THEO YÊU CẦU CỦA BẠN ---
+// --- THUẬT TOÁN DỰ ĐOÁN THEO YÊU CẦU ---
 /**
  * Thuật toán dự đoán dựa trên cầu mẫu và chu kỳ toán học.
  * @param {number} index - Chỉ số phiên hiện tại.
@@ -36,6 +36,18 @@ function vipPredictTX(index) {
   return (index % 5 === 0) ? mathGuess : patGuess;
 }
 
+// --- HÀM TẠO ĐỘ TIN CẬY NGẪU NHIÊN ---
+/**
+ * Tạo một giá trị độ tin cậy ngẫu nhiên từ 65.0% đến 95.0%.
+ * @returns {string} - Giá trị độ tin cậy dưới dạng chuỗi có ký hiệu %.
+ */
+function getRandomConfidence() {
+  const min = 65.0;
+  const max = 95.0;
+  const confidence = Math.random() * (max - min) + min;
+  return confidence.toFixed(1) + "%";
+}
+
 // --- ENDPOINT DỰ ĐOÁN ---
 app.get('/api/2k15', async (req, res) => {
   try {
@@ -45,9 +57,12 @@ app.get('/api/2k15', async (req, res) => {
 
     const currentData = data[0];
     const nextSession = currentData.Phien + 1;
-    
-    // Sử dụng thuật toán của bạn với chỉ số phiên hiện tại
-    const prediction = vipPredictTX(currentData.Phien);
+
+    // Sử dụng thuật toán của bạn với chỉ số phiên tiếp theo
+    const prediction = vipPredictTX(nextSession);
+
+    // Lấy độ tin cậy ngẫu nhiên
+    const confidence = getRandomConfidence();
 
     res.json({
       id: "@cskhtoollxk",
@@ -57,8 +72,8 @@ app.get('/api/2k15', async (req, res) => {
       ket_qua: currentData.Ket_qua,
       phien_sau: nextSession,
       du_doan: prediction,
-      do_tin_cay: "50.0%", // Đặt mặc định vì thuật toán không có cơ sở xác suất
-      giai_thich: "địt mẹ tk huy phùng"
+      do_tin_cay: confidence,
+      giai_thich: "địt mẹ m"
     });
 
   } catch (err) {
@@ -78,4 +93,4 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Server đang chạy trên cổng ${PORT}`));
-  
+    
